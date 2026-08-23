@@ -1,8 +1,15 @@
 (function(){
-  const VERSION='202608232015';
+  const VERSION='202608231247';
   const IMG={};
-  const assetNames={
-    hero1:'hero1',hero2:'hero2',hero3:'hero3',eat:'eat',take:'take',random:'random',feature:'feature',footer:'footer'
+  const assetSources={
+    hero1:'home-assets/img0.b64',
+    hero2:'home-assets/img1.b64',
+    hero3:'home-assets/img2.b64',
+    eat:'preview-assets/eat.b64',
+    take:'preview-assets/take.b64',
+    random:'preview-assets/random.b64',
+    feature:'preview-assets/feature.b64',
+    footer:'preview-assets/footer.b64'
   };
 
   const dishes=[
@@ -79,17 +86,39 @@
   `;
   document.head.appendChild(style);
 
+  function detectMime(base64){
+    const s=(base64||'').replace(/\s+/g,'');
+    if(s.startsWith('/9j/')) return 'image/jpeg';
+    if(s.startsWith('iVBOR')) return 'image/png';
+    if(s.startsWith('R0lGOD')) return 'image/gif';
+    if(s.startsWith('UklGR')) return 'image/webp';
+    try{
+      const head=atob(s.slice(0,96));
+      if(head.slice(4,8)==='ftyp'){
+        const brand=head.slice(8,24);
+        if(brand.includes('avif')||brand.includes('avis')) return 'image/avif';
+      }
+    }catch(e){}
+    return 'image/jpeg';
+  }
+
   function loadAsset(key){
     if(IMG[key]) return Promise.resolve(IMG[key]);
-    return fetch('preview-assets/'+assetNames[key]+'.b64?v='+VERSION,{cache:'no-store'})
-      .then(r=>r.text())
-      .then(t=>{IMG[key]='data:image/jpeg;base64,'+t.trim();return IMG[key];})
-      .catch(()=>{IMG[key]='assets/home.webp';return IMG[key];});
+    const path=assetSources[key];
+    if(!path) return Promise.resolve('assets/home.webp');
+    return fetch(path+'?v='+VERSION,{cache:'no-store'})
+      .then(r=>{if(!r.ok) throw new Error('asset '+r.status);return r.text()})
+      .then(t=>{
+        const clean=t.trim().replace(/\s+/g,'');
+        IMG[key]='data:'+detectMime(clean)+';base64,'+clean;
+        return IMG[key];
+      })
+      .catch(()=>{IMG[key]='assets/home.webp';return IMG[key]});
   }
 
   function setImg(el,key){
     if(!el) return;
-    loadAsset(key).then(src=>{if(el && document.body.contains(el)) el.src=src;});
+    loadAsset(key).then(src=>{if(el && document.body.contains(el)) el.src=src});
   }
 
   let heroIndex=0,heroTimer=null;
