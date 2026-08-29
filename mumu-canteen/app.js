@@ -4,6 +4,14 @@ let pendingAdd = null;
 
 function money(n){ return '¥' + n.toFixed(2); }
 
+function lineKeyFor(item, person){
+  return encodeURIComponent(JSON.stringify([item.id, item.spec || '', person]));
+}
+
+function getItemLines(itemId){
+  return Object.entries(cart).filter(([,x])=>x.itemId===itemId);
+}
+
 function selectCatStatic(index){
   document.querySelectorAll('.cat').forEach((el,i)=>el.classList.toggle('active', i===index));
   document.querySelectorAll('.static-section').forEach((el,i)=>el.style.display = i===index ? 'block' : 'none');
@@ -66,12 +74,10 @@ function closePersonPicker(){
 function confirmPerson(person){
   if(!pendingAdd) return;
   const item = pendingAdd;
-  const id = item.id;
-  if(!cart[id]) cart[id] = {price:item.price, name:item.name, qty:0, spec:item.spec || '', person:person};
-  cart[id].qty += 1;
-  cart[id].person = person;
-  if(item.spec) cart[id].spec = item.spec;
-  renderControl(id);
+  const lineKey = lineKeyFor(item, person);
+  if(!cart[lineKey]) cart[lineKey] = {itemId:item.id, price:item.price, name:item.name, qty:0, spec:item.spec || '', person:person};
+  cart[lineKey].qty += 1;
+  renderControl(item.id);
   updateCart();
   closePersonPicker();
   toast('已加入 ' + item.name + ' · ' + person + '想吃 ♡');
@@ -81,27 +87,34 @@ function addItem(id, price, name){
   openPersonPicker({id:id, price:price, name:name});
 }
 
-function changeStaticQty(id, delta){
-  if(!cart[id]) return;
-  cart[id].qty += delta;
-  if(cart[id].qty <= 0) delete cart[id];
-  renderControl(id);
+function changeLineQty(lineKey, delta){
+  if(!cart[lineKey]) return;
+  const itemId = cart[lineKey].itemId;
+  cart[lineKey].qty += delta;
+  if(cart[lineKey].qty <= 0) delete cart[lineKey];
+  renderControl(itemId);
   updateCart();
+}
+
+function decreaseItem(itemId){
+  const lines = getItemLines(itemId);
+  if(lines.length === 1) changeLineQty(lines[0][0], -1);
+  else if(lines.length > 1) openCart();
 }
 
 function renderControl(id){
   const control = document.getElementById('control_' + id);
   const item = document.getElementById(id);
-  const q = cart[id] ? cart[id].qty : 0;
+  const q = getItemLines(id).reduce((sum,[,x])=>sum+x.qty,0);
   const price = Number(item.dataset.price);
   const name = item.dataset.name;
 
   if(q > 0){
     control.innerHTML = `
       <div class="qty">
-        <button class="minus" data-action="minus" data-id="${id}">−</button>
+        <button class="minus" data-action="item-minus" data-id="${id}">−</button>
         <span>${q}</span>
-        <button class="plus" data-action="plus" data-id="${id}">+</button>
+        <button class="plus" data-action="item-plus" data-id="${id}">+</button>
       </div>`;
   }else{
     const originalSpec = item.querySelector('.spec') !== null || item.dataset.wasSpec === '1';
@@ -193,16 +206,16 @@ function renderCartList(){
   if(!entries.length){
     list.innerHTML='<div style="padding:28px 0;text-align:center;color:#b08f71">还没选今天吃什么</div>';
   }else{
-    list.innerHTML=entries.map(([id,x])=>`
+    list.innerHTML=entries.map(([lineKey,x])=>`
       <div class="cart-item">
         <div class="left">
           <b>${x.name} <span style="font-size:11px;padding:2px 7px;border-radius:999px;background:#fff0ad;color:#7b5b42;vertical-align:2px">${x.person || '未标记'}</span></b>
           <span>${x.spec ? x.spec + ' · ' : ''}${money(x.price)}</span>
         </div>
         <div class="qty">
-          <button class="minus" data-action="minus" data-id="${id}">−</button>
+          <button class="minus" data-action="line-minus" data-line-key="${lineKey}">−</button>
           <span>${x.qty}</span>
-          <button class="plus" data-action="plus" data-id="${id}">+</button>
+          <button class="plus" data-action="line-plus" data-line-key="${lineKey}">+</button>
         </div>
       </div>`).join('');
   }
@@ -218,7 +231,7 @@ function openCart(){
 function closeCart(){ document.getElementById('mask').classList.remove('show'); }
 
 function clearCart(){
-  const ids = Object.keys(cart);
+  const ids = [...new Set(Object.values(cart).map(x=>x.itemId))];
   cart = {};
   ids.forEach(renderControl);
   updateCart();
@@ -281,13 +294,27 @@ document.addEventListener('click', function(e){
     return;
   }
 
-  if(action === 'plus'){
-    changeStaticQty(btn.dataset.id, 1);
+  if(action === 'item-plus'){
+    const item = document.getElementById(btn.dataset.id);
+    const price = Number(item.dataset.price);
+    const name = item.dataset.name;
+    if(item.dataset.wasSpec === '1') openSpec(item.id, price, name);
+    else addItem(item.id, price, name);
     return;
   }
 
-  if(action === 'minus'){
-    changeStaticQty(btn.dataset.id, -1);
+  if(action === 'item-minus'){
+    decreaseItem(btn.dataset.id);
+    return;
+  }
+
+  if(action === 'line-plus'){
+    changeLineQty(btn.dataset.lineKey, 1);
+    return;
+  }
+
+  if(action === 'line-minus'){
+    changeLineQty(btn.dataset.lineKey, -1);
     return;
   }
 

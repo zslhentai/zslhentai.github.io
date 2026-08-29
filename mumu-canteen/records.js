@@ -90,7 +90,7 @@
     saveRecords(records.slice(0,100));
 
     if(typeof closeCart === 'function') closeCart();
-    const ids = Object.keys(cart);
+    const ids = [...new Set(Object.values(cart).map(function(x){return x.itemId;}))];
     cart = {};
     ids.forEach(function(id){ if(typeof renderControl === 'function') renderControl(id); });
     if(typeof updateCart === 'function') updateCart();
