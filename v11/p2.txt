@@ -1,0 +1,56 @@
+tElementById('eventTitle'),eventSub=document.getElementById('eventSub'),debugEl=document.getElementById('debug');
+const DEBUG=new URLSearchParams(location.search).get('debug')==='1';
+const STATE={NORMAL:'NORMAL',WARNING:'WARNING',ACTIVE:'ACTIVE',RECOVERY:'RECOVERY'};
+const EVENT={NONE:null,METEOR:'METEOR',SIDE:'SIDE'};
+let W=0,H=0,DPR=1,started=false,dead=false,paused=false,last=0,time=0,score=0,best=0,bonus=0,combo=0,comboTimer=0,grazeCount=0,maxCombo=0,flash=0,shakeT=0,shakeP=0,dragging=false,lastTouchX=0,lastTouchY=0,spawnT=.2,eventCooldown=9,eventMood=0,recoverT=0,nearDanger=0,quality=1,lowFpsT=0,fps=60,fpsAcc=0,fpsN=0,fpsWindow=0,eventClears=0,meteorClears=0,sideClears=0,eventStreak=0,stage=1,stageFlash=0,patternCount=0,blocks=[],particles=[],texts=[],stars=[],warnings=[],rings=[];
+const pools={block:[],particle:[]};
+const machine={state:STATE.NORMAL,type:EVENT.NONE,phase:0,t:0,total:0,max:0,data:null,rewarded:false};
+const gain=1.05,p={x:0,y:0,r:14,targetX:0,targetY:0,maxSpeed:930,minY:90};
+const STAGE_TIMES=[0,18000,38000,62000];
+function stageData(n=stage){return n===1?{spawn:.36,speed:1.02,eventMin:7.2,eventRand:2.4,star:0,barGap:1,pattern:.06,label:'STAGE 1',sub:'RUSH START',top:'#0d1832',bottom:'#05080f',grid:'#7ea8ff',starSpeed:1}:n===2?{spawn:.315,speed:1.13,eventMin:6.2,eventRand:2.0,star:.1,barGap:.95,pattern:.24,label:'STAGE 2',sub:'PATTERNS ONLINE',top:'#171735',bottom:'#080916',grid:'#9a8cff',starSpeed:1.25}:n===3?{spawn:.275,speed:1.25,eventMin:5.4,eventRand:1.65,star:.18,barGap:.9,pattern:.42,label:'STAGE 3',sub:'DANGER ZONE',top:'#251536',bottom:'#0b0815',grid:'#d07dff',starSpeed:1.55}:{spawn:.24,speed:1.38,eventMin:4.7,eventRand:1.25,star:.28,barGap:.84,pattern:.58,label:'STAGE 4',sub:'OVERDRIVE',top:'#34132e',bottom:'#0d0712',grid:'#ff6db5',starSpeed:1.9}}
+function currentStageByTime(){return time>=STAGE_TIMES[3]?4:time>=STAGE_TIMES[2]?3:time>=STAGE_TIMES[1]?2:1}
+function syncStageUI(){if(stageEl)stageEl.textContent=stage}
+function promoteStage(next){stage=next;stageFlash=.75;syncStageUI();bonus+=stage*6;shake(.14,5);sfx('clear');announce(stageData().label,stageData().sub)}
+function applyStageProgress(){let next=currentStageByTime();if(next!==stage)promoteStage(next)}
+let audioCtx=null,audioReady=false,audioUnlocked=false;
+function initAudio(){
+  if(audioCtx)return audioCtx;
+  try{
+    const AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC)return null;
+    audioCtx=new AC();return audioCtx
+  }catch(e){audioReady=false;return null}
+}
+function unlockAudio(){
+  const ac=initAudio();if(!ac)return;
+  try{
+    const b=ac.createBuffer(1,1,22050),src=ac.createBufferSource(),g=ac.createGain();
+    src.buffer=b;g.gain.value=.00001;src.connect(g);g.connect(ac.destination);src.start(0);
+  }catch(e){}
+  const mark=()=>{audioReady=ac.state==='running';if(audioReady&&!audioUnlocked){audioUnlocked=true;tone(520,.045,'sine',.018,120)}};
+  try{
+    if(ac.state==='suspended'){const r=ac.resume();if(r&&r.then)r.then(mark).catch(()=>{})}else mark();
+    ac.onstatechange=mark;
+  }catch(e){}
+}
+function tone(freq=440,dur=.08,type='sine',vol=.035,slide=0,delay=0){
+  const ac=audioCtx||initAudio();if(!ac)return;
+  try{
+    const t=ac.currentTime+delay,o=ac.createOscillator(),g=ac.createGain();
+    o.type=type;o.frequency.setValueAtTime(Math.max(40,freq),t);
+    if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(40,freq+slide),t+dur);
+    const out=Math.min(.12,vol*2.4);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(.0002,out),t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+    o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+dur+.02)
+  }catch(e){}
+}
+function sfx(name){
+  if(!audioCtx||audioCtx.state!=='running')return;
+  if(name==='graze'){tone(760,.055,'sine',.025,240)}
+  else if(name==='warning'){tone(220,.12,'square',.022,80);tone(330,.09,'sine',.018,120,.09)}
+  else if(name==='meteor'){tone(150,.18,'sawtooth',.028,-55);tone(95,.22,'sine',.02,-25,.04)}
+  else if(name==='shot'){tone(125,.11,'sawtooth',.04,420);tone(380,.06,'square',.018,220,.02)}
+  else if(name==='clear'){tone(520,.08,'sine',.026,180);tone(760,.1,'sine',.024,210,.07)}
+  else if(name==='streak'){tone(660,.07,'triangle',.023,190);tone(880,.08,'triangle',.023,210,.06);tone(1100,.09,'sine',.02,120,.12)}
+  else if(name==='death'){tone(210,.14,'sawtooth',.04,-120);tone(120,.22,'square',.024,-60,.06)}
+}
+try{best=+localStorage.getItem('neonBest')||0}catch(e){}bestEl.textContent=best;debugE
