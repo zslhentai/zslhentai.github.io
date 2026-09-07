@@ -1,0 +1,10 @@
+ 16px')+' sans-serif';ctx.textAlign='center';ctx.fillText(q.t,0,0);ctx.restore()}drawDebugHitboxes()}
+function frame(now){let dt=last?Math.min((now-last)/1000,.033):0;last=now;if(started&&!dead&&!paused){try{update(dt)}catch(err){console.error(err);warnings.length=0;for(let i=blocks.length-1;i>=0;i--){if(blocks[i].event){release('block',blocks[i]);blocks.splice(i,1)}}resetMachine();recoverT=0;eventCooldown=4;spawnT=.45;announce('SYSTEM RECOVERY','运行异常 · 已自动恢复')}}try{draw()}catch(err){console.error(err)}requestAnimationFrame(frame)}
+function getPos(e){let t=e.touches&&e.touches.length?e.touches[0]:e.changedTouches&&e.changedTouches.length?e.changedTouches[0]:e;return{x:t.clientX,y:t.clientY}}
+function begin(e){if(e.target===pauseBtn)return;if(e.cancelable)e.preventDefault();unlockAudio();if(paused){setPaused(false);return}if(!started||dead)reset();dragging=true;let q=getPos(e);lastTouchX=q.x;lastTouchY=q.y}
+function move(e){if(e.cancelable)e.preventDefault();if(!dragging||!started||dead||paused)return;let q=getPos(e),rawDx=q.x-lastTouchX,rawDy=q.y-lastTouchY,mag=Math.hypot(rawDx,rawDy),dynamicGain=mag<5?.72:mag<15?.9:1.07,dx=rawDx*dynamicGain,dy=rawDy*dynamicGain;lastTouchX=q.x;lastTouchY=q.y;p.targetX+=dx;p.targetY+=dy;clampPlayer()}
+function stop(){dragging=false;p.targetX=p.x;p.targetY=p.y}
+function pp(e){if(e.cancelable)e.preventDefault();e.stopPropagation();setPaused(!paused)}
+pauseBtn.addEventListener('touchstart',pp,{passive:false});pauseBtn.addEventListener('pointerdown',e=>{if(e.pointerType!=='touch')pp(e)});document.addEventListener('touchstart',begin,{passive:false});document.addEventListener('touchmove',move,{passive:false});document.addEventListener('touchend',stop,{passive:false});document.addEventListener('touchcancel',stop,{passive:false});document.addEventListener('mousedown',begin);document.addEventListener('mousemove',e=>{if(e.buttons)move(e)});document.addEventListener('mouseup',stop);document.addEventListener('visibilitychange',()=>{if(document.hidden&&started&&!dead&&!paused)setPaused(true)});resize();requestAnimationFrame(frame)})();
+</script>
+</body></html>
