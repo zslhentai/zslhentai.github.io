@@ -7,19 +7,19 @@ const errorMessage = document.querySelector('#webgl-error');
 const caption = document.querySelector('#scene-caption');
 
 const palette = {
-  cream: 0xe9e3d8,
-  plaster: 0xf4f0e8,
-  warmWhite: 0xf8f5ee,
-  oak: 0xb7895f,
-  paleOak: 0xd3b18b,
-  walnut: 0x75523d,
-  sage: 0x83917d,
-  sageDark: 0x5e6f60,
-  linen: 0xd8d0c1,
-  grey: 0xa7aaa5,
-  charcoal: 0x343936,
-  stone: 0xc8c2b7,
-  clay: 0xb87962,
+  cream: 0xe5ddd0,
+  plaster: 0xf3eee5,
+  warmWhite: 0xf9f6ef,
+  oak: 0xae784d,
+  paleOak: 0xc99e72,
+  walnut: 0x684632,
+  sage: 0x778873,
+  sageDark: 0x495f50,
+  linen: 0xc9c0b0,
+  grey: 0x929995,
+  charcoal: 0x303633,
+  stone: 0xaaa49b,
+  clay: 0xad6d56,
   brass: 0x9b8054,
   glass: 0xc9d8d3,
 };
@@ -61,27 +61,28 @@ controls.target.set(0, 0.2, 0);
 controls.update();
 
 const materials = {
-  plaster: mat(palette.plaster, 0.88),
+  plaster: mat(palette.plaster, 0.92),
   cream: mat(palette.cream, 0.82),
   white: mat(palette.warmWhite, 0.84),
-  oak: mat(palette.oak, 0.68),
-  paleOak: mat(palette.paleOak, 0.7),
+  oak: mat(palette.oak, 0.64),
+  paleOak: mat(palette.paleOak, 0.68),
   walnut: mat(palette.walnut, 0.64),
   sage: mat(palette.sage, 0.82),
-  sageDark: mat(palette.sageDark, 0.75),
+  sageDark: mat(palette.sageDark, 0.7),
   linen: mat(palette.linen, 0.98),
   grey: mat(palette.grey, 0.88),
   charcoal: mat(palette.charcoal, 0.58),
-  stone: mat(palette.stone, 0.58),
+  stone: mat(palette.stone, 0.44),
   clay: mat(palette.clay, 0.8),
   brass: mat(palette.brass, 0.42, 0.35),
   black: mat(0x242825, 0.48, 0.25),
   leaf: mat(0x58705b, 0.86),
   leafLight: mat(0x799078, 0.88),
   terracotta: mat(0xa66e58, 0.86),
-  floorPublic: texturedMaterial(makeWoodTexture('#c7a47d', '#ad835d', 512, 72), 0.76),
-  floorPrivate: texturedMaterial(makeWoodTexture('#d3b18d', '#bc936d', 512, 56), 0.82),
-  tile: texturedMaterial(makeTileTexture(), 0.66),
+  floorPublic: texturedMaterial(makeWoodTexture('#b88e64', '#8f6242', 512, 72), 0.72),
+  floorPrivate: texturedMaterial(makeWoodTexture('#c8a47d', '#a27653', 512, 56), 0.8),
+  tile: texturedMaterial(makeTileTexture('#aaa79f', 'rgba(73,76,74,.28)'), 0.62),
+  bathTile: texturedMaterial(makeTileTexture('#8f9693', 'rgba(52,61,60,.34)'), 0.54),
 };
 
 function mat(color, roughness = 0.8, metalness = 0) {
@@ -126,11 +127,11 @@ function makeWoodTexture(base, grain, size, bands) {
   return texture;
 }
 
-function makeTileTexture() {
+function makeTileTexture(base = '#aaa79f', grout = 'rgba(73,76,74,.28)') {
   const texture = canvasTexture(512, (ctx, s) => {
-    ctx.fillStyle = '#c9c3b8';
+    ctx.fillStyle = base;
     ctx.fillRect(0, 0, s, s);
-    ctx.strokeStyle = 'rgba(110,108,103,.18)';
+    ctx.strokeStyle = grout;
     ctx.lineWidth = 3;
     for (let n = 0; n <= s; n += 128) {
       ctx.beginPath(); ctx.moveTo(n, 0); ctx.lineTo(n, s); ctx.stroke();
@@ -166,10 +167,10 @@ function makeFabricTexture(base = '#c9c0b1', line = '#9f9688') {
 function makeRugTexture(style) {
   return canvasTexture(512, (ctx, s) => {
     const schemes = {
-      living: ['#c6bbaa', '#8a9586', '#eee8dc'],
-      master: ['#ddd1c2', '#bca490', '#f1e9df'],
-      guest: ['#c8cbca', '#8f9794', '#e7e3dc'],
-      studio: ['#a7ad92', '#6e7d67', '#d8d2bb'],
+      living: ['#a9a194', '#667669', '#ded8cd'],
+      master: ['#c9b9a7', '#9f8069', '#e7ded3'],
+      guest: ['#b3b8b5', '#727d79', '#dad7d0'],
+      studio: ['#929c7f', '#53654f', '#c8c3ad'],
     };
     const [base, accent, light] = schemes[style];
     ctx.fillStyle = base; ctx.fillRect(0, 0, s, s);
@@ -207,8 +208,8 @@ function makeArtTexture(kind) {
   });
 }
 
-const fabricMat = texturedMaterial(makeFabricTexture(), .98);
-const fabricLightMat = texturedMaterial(makeFabricTexture('#e7dfd2', '#bdb5a8'), .98);
+const fabricMat = texturedMaterial(makeFabricTexture('#b9ae9e', '#827a70'), .98);
+const fabricLightMat = texturedMaterial(makeFabricTexture('#d7ccbc', '#9c9285'), .98);
 const glassMat = new THREE.MeshPhysicalMaterial({ color: palette.glass, transmission: .35, transparent: true, opacity: .3, roughness: .18, metalness: 0, side: THREE.DoubleSide });
 
 const home = new THREE.Group();
@@ -524,14 +525,15 @@ function buildBathroom() {
   box(g, 3.25, 1.15, 5.0, 1.22, 1.72, .035, glassMat, { cast: false });
   cyl(g, 2.82, 1.72, 6.3, .035, .72, materials.brass, 12);
   // Toilet and compact vanity
-  box(g, 4.72, .42, 6.1, .62, .48, .78, materials.white);
-  box(g, 4.72, .82, 6.32, .64, .72, .26, materials.white);
-  cyl(g, 4.72, .69, 5.83, .34, .1, materials.white, 24);
-  cabinet(g, 5.65, 4.86, 1.02, .72, .5, materials.paleOak, 0);
-  box(g, 5.65, .95, 4.86, 1.08, .12, .58, materials.stone);
-  cyl(g, 5.65, 1.05, 4.82, .25, .1, materials.white, 24);
+  box(g, 4.7, .42, 5.62, .62, .48, .78, materials.white);
+  box(g, 4.7, .82, 5.88, .64, .72, .26, materials.white);
+  cyl(g, 4.7, .69, 5.34, .34, .1, materials.white, 24);
+  cabinet(g, 5.68, 6.14, 1.08, .72, .5, materials.paleOak, 0);
+  box(g, 5.68, .95, 6.14, 1.14, .12, .58, materials.stone);
+  cyl(g, 5.68, 1.05, 6.1, .25, .1, materials.white, 24);
   const mirror = new THREE.Mesh(new THREE.CircleGeometry(.42, 28), glassMat);
-  mirror.position.set(5.65, 1.68, 4.53); mirror.rotation.y = Math.PI; g.add(mirror);
+  mirror.position.set(5.68, 1.68, 6.48); g.add(mirror);
+  practicalLight(g, 4.55, 2.35, 5.72, .16, .012, 0xffc991, 3.4);
 }
 
 function slatScreen(parent, x, z, length, ry = 0) {
@@ -543,55 +545,66 @@ function slatScreen(parent, x, z, length, ry = 0) {
 
 function buildArchitecture() {
   // Continuous base and distinct flooring zones
-  box(home, 0, -.07, .2, 23.7, .18, 14.1, materials.charcoal, { cast: false });
+  box(home, -2.65, -.07, .2, 18.4, .18, 14.1, materials.charcoal, { cast: false });
+  box(home, 9.2, -.07, -1.1, 5.3, .18, 11.5, materials.charcoal, { cast: false });
   floor(home, -4.5, -1.0, 14.1, 11.0, materials.floorPublic);
-  floor(home, -7.15, 5.76, 8.9, 2.28, materials.tile);
+  floor(home, -6.8, 5.76, 9.55, 2.28, materials.tile);
+  floor(home, .28, 5.7, 4.2, 2.44, materials.tile);
   floor(home, 7.25, -3.92, 8.9, 5.25, materials.floorPrivate);
-  floor(home, 5.02, 1.75, 4.25, 5.55, materials.floorPrivate);
+  floor(home, 5.02, 1.12, 4.25, 4.28, materials.floorPrivate);
   floor(home, 9.45, 1.75, 4.25, 5.55, materials.floorPrivate);
-  floor(home, 7.25, 5.5, 8.9, 2.8, materials.tile);
+  floor(home, 4.42, 5.7, 4.08, 2.44, materials.bathTile);
+  floor(home, 4.42, 3.88, 4.08, 1.16, materials.floorPrivate);
 
   // North and side shell, kept open toward the viewer as an architectural cutaway
   wallX(home, -8.4, -6.58, 6.7); wallX(home, -2.2, -6.58, 4.9);
   wallX(home, 5.3, -6.58, 4.1); wallX(home, 10.25, -6.58, 2.5);
   wallZ(home, -11.63, -3.05, 7.0); wallZ(home, -11.63, 2.65, 3.3);
-  wallZ(home, 11.63, -4.3, 4.55); wallZ(home, 11.63, 1.72, 5.05); wallZ(home, 11.63, 5.9, 1.15);
+  wallZ(home, 11.63, -4.3, 4.55); wallZ(home, 11.63, 1.72, 5.05);
 
-  // Public/private spine: one clear opening from foyer to the open living area.
+  // Public/private spine: public rooms stay west; the private hall begins at the north opening.
   wallZ(home, 2.38, -5.15, 2.65);
   wallZ(home, 2.38, -2.1, 3.0);
   wallZ(home, 2.38, 1.4, 3.6);
-  wallZ(home, 2.38, 5.65, 1.65);
+  wallZ(home, 2.38, 5.7, 2.44);
 
-  // Private corridor: studio and guest room flank a 1.3-unit hall; master sits at its quiet end.
+  // Private corridor: a short cross-hall leaves the public core, then feeds all three rooms.
   wallX(home, 4.48, -1.08, 4.15);
   wallX(home, 9.67, -1.08, 3.92);
   door(home, 6.65, -1.18, 0, -.58);
-  wallZ(home, 6.45, .51, 3.18); wallZ(home, 6.45, 3.765, 1.43);
+  wallZ(home, 6.45, 1.08, 4.1);
   wallZ(home, 7.78, .51, 3.18); wallZ(home, 7.78, 3.765, 1.43);
-  door(home, 6.35, 3.0, Math.PI / 2, .62);
   door(home, 7.88, 2.15, -Math.PI / 2, -.62);
-  wallX(home, 4.42, 4.48, 4.05); wallX(home, 9.72, 4.48, 3.82);
+  wallX(home, 3.64, 3.3, 2.52);
+  door(home, 4.92, 3.2, 0, -.58);
+  wallX(home, 6.18, 3.3, .54);
+  wallX(home, 9.72, 4.48, 3.82);
 
-  // Compact bathroom beside the foyer, entered from the arrival zone.
-  wallZ(home, 6.45, 4.85, .74); wallZ(home, 6.45, 6.52, .74);
-  door(home, 6.35, 6.12, Math.PI / 2, .62);
+  // Compact bathroom is deliberately off the secondary hall, outside the arrival sightline.
+  wallX(home, 3.69, 4.48, 2.62);
+  door(home, 5.02, 4.38, 0, .56);
+  wallX(home, 6.22, 4.48, .46);
+  wallZ(home, 6.45, 5.7, 2.44);
+  wallX(home, 4.42, 6.92, 4.08);
 
-  // Recognizable front door and a compact, living-room-scaled landscape balcony.
-  wallX(home, 5.65, 6.92, 5.75); wallX(home, 10.82, 6.92, 1.62);
-  entryDoor(home, 9.35, 6.82);
-  floor(home, 9.35, 7.22, 2.25, .55, materials.stone);
-  box(home, 9.35, .24, 6.44, 1.25, .03, .5, materials.charcoal, { cast: false });
-  box(home, -7.15, .22, 4.55, 8.75, .11, .14, materials.brass);
-  for (let x = -11.35; x <= -2.95; x += 1.05) box(home, x, .69, 6.86, .045, .95, .045, materials.charcoal);
-  box(home, -7.15, .67, 6.86, 8.75, .08, .08, materials.charcoal);
-  box(home, -7.15, .68, 6.82, 8.68, .78, .025, glassMat, { cast: false });
-  box(home, -2.72, .69, 5.75, .08, .95, 2.25, materials.charcoal);
-  box(home, -2.76, .68, 5.75, .025, .78, 2.15, glassMat, { cast: false });
+  // The entrance now lands directly in a small foyer facing the open public core.
+  wallZ(home, -1.85, 5.7, 2.44);
+  wallX(home, -1.15, 6.92, 1.4); wallX(home, 1.65, 6.92, 1.4);
+  entryDoor(home, .25, 6.82);
+  floor(home, .25, 7.22, 2.15, .55, materials.stone);
+  box(home, .25, .24, 6.44, 1.25, .03, .5, materials.charcoal, { cast: false });
+
+  // The balcony is a shallow living-room extension, separated from the foyer rather than an exterior corridor.
+  box(home, -6.8, .22, 4.55, 9.4, .11, .14, materials.brass);
+  for (let x = -11.35; x <= -2.25; x += 1.05) box(home, x, .69, 6.86, .045, .95, .045, materials.charcoal);
+  box(home, -6.8, .67, 6.86, 9.45, .08, .08, materials.charcoal);
+  box(home, -6.8, .68, 6.82, 9.38, .78, .025, glassMat, { cast: false });
+  box(home, -2.02, .69, 5.75, .08, .95, 2.25, materials.charcoal);
+  box(home, -2.06, .68, 5.75, .025, .78, 2.15, glassMat, { cast: false });
   // Sliding-door frame between living room and balcony.
-  box(home, -7.15, 1.48, 4.48, 8.75, .1, .12, materials.charcoal);
-  [-11.45,-7.15,-2.8].forEach(x => box(home, x, 1.45, 4.48, .08, 2.5, .12, materials.charcoal));
-  box(home, -7.15, 1.46, 4.5, 8.55, 2.38, .025, glassMat, { cast: false });
+  box(home, -6.8, 1.48, 4.48, 9.4, .1, .12, materials.charcoal);
+  [-11.48,-6.8,-2.12].forEach(x => box(home, x, 1.45, 4.48, .08, 2.5, .12, materials.charcoal));
+  box(home, -6.8, 1.46, 4.5, 9.2, 2.38, .025, glassMat, { cast: false });
 
   // Exterior windows
   windowX(home, -7.9, -6.7, 3.7); windowX(home, -2.0, -6.7, 3.35);
@@ -599,6 +612,7 @@ function buildArchitecture() {
   windowZ(home, 11.74, -3.95, 2.6); windowZ(home, 11.74, 1.65, 2.7);
   baseboardX(home, -7.2, -6.45, 8.2); baseboardX(home, 7.05, -6.45, 8.65);
   baseboardZ(home, 2.49, -2.2, 7.8); baseboardX(home, 7.08, -1.2, 8.8);
+  baseboardX(home, 4.42, 3.42, 4.0);
 }
 
 function buildLivingDining() {
@@ -611,8 +625,8 @@ function buildLivingDining() {
   plant(publicGroup, -9.85, 1.35, .95);
   tvWall(publicGroup);
   artPanel(publicGroup, -5.2, 1.65, -6.73, 2.65, 1.34, 'living', 0);
-  cabinet(publicGroup, -.05, 3.02, 2.15, .82, .55, materials.walnut, 0);
-  plant(publicGroup, .73, 3.0, .58, materials.stone);
+  cabinet(publicGroup, 2.0, 1.85, 2.15, .82, .55, materials.walnut, Math.PI / 2);
+  plant(publicGroup, -2.2, 3.42, .58, materials.stone);
 
   diningSet(publicGroup, -.75, -.9);
   cabinet(publicGroup, .02, -5.86, 2.7, .82, .56, materials.paleOak, 0);
@@ -666,25 +680,25 @@ function buildStudio() {
 function buildBalconyAndEntry() {
   const g = new THREE.Group(); g.name = '阳台与入户'; home.add(g);
   // Balcony lounge and planting rhythm
-  const bench = groupAt(g, -7.9, 5.62);
+  const bench = groupAt(g, -7.55, 5.62);
   box(bench, 0, .43, 0, 2.9, .52, .8, materials.paleOak);
   box(bench, 0, .74, .27, 2.72, .22, .38, materials.sage);
   box(bench, -1.12, .89, .18, .35, .42, .62, materials.clay);
-  cyl(g, -5.68, .4, 5.72, .44, .72, materials.stone, 26);
-  cyl(g, -5.68, .78, 5.72, .16, .12, materials.cream, 22);
-  plant(g, -10.55, 5.7, .68, materials.charcoal); plant(g, -3.25, 5.72, .55, materials.terracotta);
-  [-10.7,-3.45].forEach(x => {
+  cyl(g, -5.28, .4, 5.72, .44, .72, materials.stone, 26);
+  cyl(g, -5.28, .78, 5.72, .16, .12, materials.cream, 22);
+  plant(g, -10.55, 5.7, .68, materials.charcoal); plant(g, -2.55, 5.72, .55, materials.terracotta);
+  [-10.7,-2.55].forEach(x => {
     cyl(g, x, .28, 6.35, .11, .42, materials.charcoal, 14);
     practicalLight(g, x, .55, 6.35, .22, 0, 0xffc98a, 2.6);
     glowMarker(g, x, .55, 6.35, .045);
   });
-  // Foyer storage, bench and mirror
-  cabinet(g, 10.92, 5.52, 2.55, 2.24, .58, materials.sageDark, Math.PI / 2);
-  const entryBench = groupAt(g, 8.7, 4.95);
+  // Compact foyer storage and seat sit beside the new public-facing entrance.
+  cabinet(g, 1.95, 5.64, 2.0, 2.24, .52, materials.sageDark, Math.PI / 2);
+  const entryBench = groupAt(g, -1.05, 5.55);
   box(entryBench, 0, .45, 0, 1.4, .18, .55, materials.paleOak);
   box(entryBench, -.55, .23, 0, .08, .46, .46, materials.charcoal); box(entryBench, .55, .23, 0, .08, .46, .46, materials.charcoal);
   box(entryBench, 0, .61, 0, 1.26, .13, .46, materials.linen);
-  const mirror = new THREE.Mesh(new THREE.CircleGeometry(.55, 32), glassMat); mirror.position.set(8.7, 1.62, 4.58); mirror.rotation.y = Math.PI; home.add(mirror);
+  const mirror = new THREE.Mesh(new THREE.CircleGeometry(.48, 32), glassMat); mirror.position.set(-1.68, 1.62, 5.55); mirror.rotation.y = Math.PI / 2; home.add(mirror);
 }
 
 buildArchitecture();
@@ -696,20 +710,24 @@ buildBalconyAndEntry();
 buildBathroom();
 
 // Studio-style lighting, plus warm pools over the public room.
-const hemisphere = new THREE.HemisphereLight(0xfff7e8, 0x79817c, 1.8);
+const hemisphere = new THREE.HemisphereLight(0xfff7e8, 0x66716b, 1.25);
 scene.add(hemisphere);
-const sun = new THREE.DirectionalLight(0xffeed0, 3.6);
+const sun = new THREE.DirectionalLight(0xffedcf, 4.15);
 sun.position.set(-12, 24, 18); sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048); sun.shadow.camera.left = -20; sun.shadow.camera.right = 20; sun.shadow.camera.top = 18; sun.shadow.camera.bottom = -18; sun.shadow.camera.far = 60; sun.shadow.bias = -.0003;
+sun.shadow.radius = 2.4;
 scene.add(sun);
-const fill = new THREE.DirectionalLight(0xc9d9cf, .65); fill.position.set(18, 10, -16); scene.add(fill);
-const ambientWarm = new THREE.PointLight(0xffd1a0, .28, 14, 2); ambientWarm.position.set(-4, 4.8, -1); scene.add(ambientWarm);
-practicalLight(scene, -5.2, 2.55, .15, 1.05, .02, 0xffc67e, 7.5);
-practicalLight(scene, 7.05, 2.3, -4.15, .38, 0, 0xffc98a, 5.2);
-practicalLight(scene, 9.55, 2.3, 1.3, .28, 0, 0xffcd91, 4.8);
-practicalLight(scene, 4.85, 2.35, 1.45, .32, 0, 0xffcc8e, 4.8);
+const balconyLight = new THREE.DirectionalLight(0xffe4bd, 1.05);
+balconyLight.position.set(-10, 12, 14); balconyLight.target.position.set(-5, 0, 0); scene.add(balconyLight, balconyLight.target);
+const fill = new THREE.DirectionalLight(0xc4d2ca, .38); fill.position.set(18, 10, -16); scene.add(fill);
+const ambientWarm = new THREE.PointLight(0xffd1a0, .42, 14, 2); ambientWarm.position.set(-4.5, 4.6, .5); scene.add(ambientWarm);
+practicalLight(scene, -5.2, 2.55, .15, 1.85, .025, 0xffc67e, 8.6);
+practicalLight(scene, -6.35, 2.0, 1.35, .9, .015, 0xffc17a, 5.8);
+practicalLight(scene, 7.05, 2.3, -4.15, .36, 0, 0xffc98a, 5.2);
+practicalLight(scene, 9.55, 2.3, 1.3, .22, 0, 0xffcd91, 4.8);
+practicalLight(scene, 4.85, 2.35, 1.45, .22, 0, 0xffcc8e, 4.8);
 
-const ground = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), new THREE.ShadowMaterial({ color: 0x393b36, opacity: .115 }));
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), new THREE.ShadowMaterial({ color: 0x30332f, opacity: .17 }));
 ground.rotation.x = -Math.PI / 2; ground.position.y = -.18; ground.receiveShadow = true; scene.add(ground);
 
 const views = {
@@ -765,7 +783,9 @@ function resize() {
   const width = mount.clientWidth;
   const height = mount.clientHeight;
   if (!width || !height) return;
-  camera.aspect = width / height; camera.updateProjectionMatrix(); renderer.setSize(width, height, false);
+  camera.aspect = width / height;
+  camera.zoom = window.innerWidth <= 760 ? .72 : 1;
+  camera.updateProjectionMatrix(); renderer.setSize(width, height, false);
 }
 window.addEventListener('resize', resize);
 new ResizeObserver(resize).observe(mount);
@@ -773,7 +793,7 @@ new ResizeObserver(resize).observe(mount);
 let firstFrame = true;
 let previousFrame = performance.now();
 const dayBackground = new THREE.Color(0xf2efe8);
-const nightBackground = new THREE.Color(0x26323a);
+const nightBackground = new THREE.Color(0x101b22);
 function animate(now) {
   requestAnimationFrame(animate);
   const delta = Math.min(.05, Math.max(0, (now - previousFrame) / 1000));
@@ -781,13 +801,14 @@ function animate(now) {
   modeMix += (targetModeMix - modeMix) * (1 - Math.exp(-delta * 2.8));
   scene.background.copy(dayBackground).lerp(nightBackground, modeMix);
   scene.fog.color.copy(dayBackground).lerp(nightBackground, modeMix);
-  scene.fog.density = THREE.MathUtils.lerp(.013, .019, modeMix);
-  hemisphere.intensity = THREE.MathUtils.lerp(1.8, .24, modeMix);
-  sun.intensity = THREE.MathUtils.lerp(3.6, .08, modeMix);
-  fill.intensity = THREE.MathUtils.lerp(.65, .12, modeMix);
-  ambientWarm.intensity = THREE.MathUtils.lerp(.28, .16, modeMix);
-  renderer.toneMappingExposure = THREE.MathUtils.lerp(1.08, .88, modeMix);
-  ground.material.opacity = THREE.MathUtils.lerp(.135, .25, modeMix);
+  scene.fog.density = THREE.MathUtils.lerp(.012, .0165, modeMix);
+  hemisphere.intensity = THREE.MathUtils.lerp(1.25, .17, modeMix);
+  sun.intensity = THREE.MathUtils.lerp(4.15, .025, modeMix);
+  balconyLight.intensity = THREE.MathUtils.lerp(1.05, .015, modeMix);
+  fill.intensity = THREE.MathUtils.lerp(.38, .07, modeMix);
+  ambientWarm.intensity = THREE.MathUtils.lerp(.42, .14, modeMix);
+  renderer.toneMappingExposure = THREE.MathUtils.lerp(1.04, .96, modeMix);
+  ground.material.opacity = THREE.MathUtils.lerp(.17, .28, modeMix);
   practicalLights.forEach(light => { light.intensity = THREE.MathUtils.lerp(light.userData.dayIntensity, light.userData.nightIntensity, modeMix); });
   glowMaterials.forEach(material => { material.emissiveIntensity = THREE.MathUtils.lerp(0, 2.1, modeMix); });
   if (cameraTween) {
