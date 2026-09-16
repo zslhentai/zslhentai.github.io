@@ -10,7 +10,8 @@
 
 * { box-sizing: border-box; }
 html, body { margin: 0; min-height: 100%; background: var(--paper); color: var(--ink); }
-body { font-family: var(--sans); overflow-x: hidden; }
+body { font-family: var(--sans); overflow-x: hidden; transition: background-color 1.1s ease, color 1.1s ease; }
+body.night { --paper: #202a31; --ink: #e9e7df; --muted: #a8aca9; --line: rgba(233, 231, 223, .16); --accent: #b59a72; }
 button, a { color: inherit; }
 button { font: inherit; }
 
@@ -51,6 +52,15 @@ button { font: inherit; }
 .scene-status i { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px rgba(118, 134, 117, .13); }
 .scene-tools { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); display: grid; gap: 8px; }
 .scene-tools .reset { margin-top: 9px; }
+.mode-toggle { position: relative; }
+.mode-toggle svg { position: absolute; transition: opacity .45s ease, transform .65s ease; }
+.mode-toggle .moon-icon { opacity: 0; transform: rotate(-25deg) scale(.7); }
+body.night .mode-toggle .sun-icon { opacity: 0; transform: rotate(45deg) scale(.7); }
+body.night .mode-toggle .moon-icon { opacity: 1; transform: rotate(0) scale(1); }
+body.night .round-button { background: rgba(32,42,49,.68); }
+body.night .view-button:hover, body.night .view-button.active { background: rgba(255,255,255,.06); }
+body.night .loading { background: var(--paper); }
+body.night dialog { background: rgba(36,46,53,.98); }
 .loading { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; background: var(--paper); z-index: 5; transition: opacity .65s ease, visibility .65s; }
 .loading span { width: 72px; height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); animation: loading 1.25s ease-in-out infinite; }
 .loading p { margin: 14px 0 0; color: var(--muted); font-family: var(--serif); font-size: 11px; letter-spacing: .12em; }
@@ -122,3 +132,4 @@ dialog dd { margin: 0; font-family: var(--serif); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
