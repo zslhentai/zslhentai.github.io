@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#f2efe8" />
+    <meta name="description" content="廊间 Courtyard Lines — 原创三室一厅体素风现代住宅 3D 展示。" />
+    <title>廊间 · Courtyard Lines</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M4 12 16 6l12 6v14L16 30 4 26Z' fill='none' stroke='%2320231f' stroke-width='1.5'/%3E%3Cpath d='m4 12 12 7 12-7M16 19v11' fill='none' stroke='%2320231f' stroke-width='1.5'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="portfolio-shell">
+      <header class="topbar">
+        <a class="identity" href="./" aria-label="返回廊间项目首页">
+          <svg viewBox="0 0 42 42" aria-hidden="true">
+            <path d="M5 30.5V12l16-7 16 7v18.5L21 37 5 30.5Z" />
+            <path d="M5 12l16 7 16-7M21 19v18M12 9l17 7" />
+          </svg>
+          <span><strong>廊间</strong><small>LINEDWELL STUDIO</small></span>
+        </a>
+        <p class="topbar-note">RESIDENCE / 03 BEDROOMS / 2026</p>
+        <button class="round-button" id="help-button" type="button" aria-label="打开操作说明">?</button>
+      </header>
+
+      <section class="project-copy" aria-labelledby="project-title">
+        <p class="kicker"><span></span> VOXEL RESIDENCE — 01</p>
+        <h1 id="project-title">光沿着廊道，<br />住进日常<span>。</span></h1>
+        <p class="intro">一处以开放客餐厅为核心的三室居所。<br />木、石与绿意，在克制的几何中彼此相连。</p>
+        <div class="copy-foot"><span>COURTYARD LINES</span><span>92 M² · WARM MINIMALISM</span></div>
+      </section>
+
+      <section class="scene-wrap" aria-label="廊间三室一厅三维住宅模型">
+        <div id="scene"></div>
+        <div class="scene-status"><i></i><span id="scene-caption">全景 · 开放的公共核心与安静的卧室侧翼</span></div>
+        <div class="scene-tools" aria-label="场景工具">
+          <button class="round-button" id="zoom-in" type="button" aria-label="放大">+</button>
+          <button class="round-button" id="zoom-out" type="button" aria-label="缩小">−</button>
+          <button class="round-button reset" id="reset" type="button" aria-label="重置视角" title="重置视角">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.3 8.5A8 8 0 1 1 4.5 15M5 4v5h5" /></svg>
+          </button>
+        </div>
+        <div class="loading" id="loading"><span></span><p>正在搭建住宅模型</p></div>
+        <div class="webgl-error" id="webgl-error" hidden>无法初始化 3D 画面，请在支持 WebGL 的现代浏览器中打开。</div>
+      </section>
+
+      <footer class="viewer-footer">
+        <nav class="view-nav" aria-label="房间视角">
+          <button class="view-button active" type="button" data-view="overview"><em>01</em><span>全景</span><small>Overview</small></button>
+          <button class="view-button" type="button" data-view="living"><em>02</em><span>客餐厅</span><small>Living</small></button>
+          <button class="view-button" type="button" data-view="master"><em>03</em><span>主卧</span><small>Master</small></button>
+          <button class="view-button" type="button" data-view="guest"><em>04</em><span>次卧</span><small>Guest</small></button>
+          <button class="view-button" type="button" data-view="studio"><em>05</em><span>书房</span><small>Studio</small></button>
+          <button class="view-button" type="button" data-view="balcony"><em>06</em><span>阳台</span><small>Balcony</small></button>
+        </nav>
+        <div class="gesture-hint">
+          <svg viewBox="0 0 22 28" aria-hidden="true"><rect x="4" y="2" width="14" height="23" rx="7"/><path d="M11 6v5"/></svg>
+          <span>拖动旋转 · 滚轮缩放 · 右键平移</span>
+        </div>
+      </footer>
+
+      <div class="bottom-note"><span>AN ORIGINAL THREE-BEDROOM HOME, BUILT BLOCK BY BLOCK.</span><span>ARCHITECTURAL MINIATURE / WEBGL</span></div>
+    </main>
+
+    <dialog id="help-dialog">
+      <button class="round-button close" id="help-close" type="button" aria-label="关闭说明">×</button>
+      <p class="kicker"><span></span> EXPLORE THE HOUSE</p>
+      <h2>顺着光，慢慢看一圈。</h2>
+      <p>按住鼠标左键旋转住宅，滚轮缩放，右键拖动平移。触屏设备可单指旋转、双指缩放与移动。点击底部空间名称，会平滑抵达对应房间。</p>
+      <dl><div><dt>空间</dt><dd>三室一厅 · 开放客餐厨 · 景观阳台</dd></div><div><dt>表达</dt><dd>程序化材质 · 原创几何艺术 · 本地静态资源</dd></div></dl>
+    </dialog>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
