@@ -1,7 +1,7 @@
 :root {
   --paper: #f2efe8;
   --ink: #20231f;
-  --muted: #74766f;
+  --muted: #686b63;
   --line: rgba(32, 35, 31, 0.16);
   --accent: #768675;
   --serif: "Songti SC", "STSong", "Noto Serif CJK SC", serif;
@@ -10,7 +10,7 @@
 
 * { box-sizing: border-box; }
 html, body { margin: 0; min-height: 100%; background: var(--paper); color: var(--ink); }
-body { font-family: var(--sans); overflow-x: hidden; transition: background-color 1.1s ease, color 1.1s ease; }
+body { font-family: var(--sans); overflow-x: hidden; transition: background-color .2s ease, color .2s ease; }
 body.night { --paper: #202a31; --ink: #e9e7df; --muted: #a8aca9; --line: rgba(233, 231, 223, .16); --accent: #b59a72; }
 button, a { color: inherit; }
 button { font: inherit; }
@@ -50,10 +50,10 @@ button { font: inherit; }
 #scene canvas { display: block; width: 100%; height: 100%; outline: none; }
 .scene-status { position: absolute; left: 6px; bottom: 18px; display: flex; align-items: center; gap: 9px; color: var(--muted); font-family: var(--serif); font-size: 10px; letter-spacing: .06em; pointer-events: none; }
 .scene-status i { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px rgba(118, 134, 117, .13); }
-.scene-tools { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); display: grid; gap: 8px; }
-.scene-tools .reset { margin-top: 9px; }
+.scene-tools { position: absolute; right: 4px; top: 14px; display: flex; gap: 8px; }
+.scene-tools .reset { margin-left: 6px; }
 .mode-toggle { position: relative; }
-.mode-toggle svg { position: absolute; transition: opacity .45s ease, transform .65s ease; }
+.mode-toggle svg { position: absolute; transition: opacity .2s ease, transform .2s ease; }
 .mode-toggle .moon-icon { opacity: 0; transform: rotate(-25deg) scale(.7); }
 body.night .mode-toggle .sun-icon { opacity: 0; transform: rotate(45deg) scale(.7); }
 body.night .mode-toggle .moon-icon { opacity: 1; transform: rotate(0) scale(1); }
@@ -93,14 +93,14 @@ dialog dt { color: var(--muted); letter-spacing: .16em; }
 dialog dd { margin: 0; font-family: var(--serif); }
 
 @media (max-width: 1100px) {
-  .portfolio-shell { padding: 20px 24px 14px; grid-template-columns: 230px minmax(500px, 1fr); gap: 0 10px; }
+  .portfolio-shell { padding: 20px 24px 14px; grid-template-columns: 230px minmax(0, 1fr); gap: 0 10px; }
   .project-copy h1 { font-size: 40px; }
   .view-button { min-width: 82px; padding-left: 14px; padding-right: 14px; }
   .view-button.active::after { left: 14px; right: 14px; }
   .gesture-hint { display: none; }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 900px) {
   .portfolio-shell { min-height: 100svh; padding: 12px 12px 8px; display: block; }
   .topbar { height: 44px; }
   .identity { gap: 8px; }
@@ -109,17 +109,21 @@ dialog dd { margin: 0; font-family: var(--serif); }
   .identity small { font-size: 6px; }
   .topbar .round-button { width: 30px; height: 30px; }
   .topbar-note { display: none; }
-  .project-copy { padding: 16px 4px 12px; }
+  .project-copy { padding: 14px 4px 3px; }
+  .project-copy .kicker { display:none; }
   .kicker { margin-bottom: 10px; font-size: 7px; }
   .kicker span { width: 20px; }
-  .project-copy h1 { font-size: 29px; line-height: 1.16; }
-  .intro { margin: 10px 0 4px; font-size: 10px; line-height: 1.65; }
+  .project-copy h1 { font-size: 25px; line-height: 1.25; }
+  .project-copy h1 br { display:none; }
+  .intro { margin: 6px 0 0; font-size: 10px; line-height: 1.6; }
+  .intro br { display:none; }
   .copy-foot { display: none; }
-  .scene-wrap { height: min(62svh, 520px); min-height: 450px; margin: 0 -12px; }
+  .scene-wrap { height: clamp(380px,60svh,570px); min-height: 380px; margin: 0 -12px; }
+  #scene { inset:48px 0 30px; }
   .scene-status { left: 14px; bottom: 9px; max-width: calc(100% - 64px); font-size: 9px; }
-  .scene-tools { right: 10px; gap: 6px; }
-  .scene-tools .round-button { width: 30px; height: 30px; }
-  .scene-tools .reset { margin-top: 5px; }
+  .scene-tools { right: 12px; top:5px; gap: 8px; }
+  .scene-tools .round-button { width: 36px; height: 36px; }
+  .scene-tools .reset { margin-top: 0; }
   .viewer-footer { min-height: auto; margin-top: 6px; overflow-x: auto; scrollbar-width: none; }
   .viewer-footer::-webkit-scrollbar { display: none; }
   .view-nav { width: max-content; }
@@ -134,9 +138,11 @@ dialog dd { margin: 0; font-family: var(--serif); }
 }
 
 @media (max-width: 420px) {
-  .project-copy h1 { font-size: 27px; }
-  .scene-wrap { height: 60svh; min-height: 460px; }
+  .project-copy h1 { font-size: 24px; }
 }
+
+button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:4px;}
+::selection{background:#cbd3c4;color:#20231f;}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
