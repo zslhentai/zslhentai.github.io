@@ -7,6 +7,8 @@ export const footprints=[];
 export function buildFurniture(parent,m){
   footprints.length=0;
   const g=new THREE.Group();g.name='新户型核心家具';parent.add(g);
+  const interactive={};
+  const hitMaterial=new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false,colorWrite:false});
   const record=(name,room,b)=>footprints.push({name,room,bounds:b});
   function cabinet(name,room,b,height=1.75,front='south',mat=m.oak){
     const [a,b1,c,d]=b;record(name,room,b);rect(g,a,b1,c,d,height,mat,.06,name);
@@ -33,8 +35,16 @@ export function buildFurniture(parent,m){
     const mid=(b1+d)/2;
     for(const [y1,y2]of [[b1+6,mid-3],[mid+3,d-6]])rect(g,east?c-31:a+5,y1,east?c-6:a+30,y2,.12,m.linen,.53);
   }
-  function basin(a,b,c,d){rect(g,a,b,c,d,.065,m.white,.86);rect(g,a+4,b+4,c-4,d-4,.009,m.basin,.896);
-    block(g,X((a+c)/2),1.015,Z(b+3),.025,.19,.025,m.metal);block(g,X((a+c)/2),1.1,Z(b+6),.025,.025,.12,m.metal);}
+  function basin(a,b,c,d,{interactiveFaucet=false}={}){rect(g,a,b,c,d,.065,m.white,.86);rect(g,a+4,b+4,c-4,d-4,.009,m.basin,.896);
+    const cx=(a+c)/2,stem=block(g,X(cx),1.015,Z(b+3),.025,.19,.025,m.metal,'水龙头');
+    block(g,X(cx),1.1,Z(b+7),.025,.025,.15,m.metal,'水龙头出水嘴');
+    block(g,X(cx+4),1.045,Z(b+2),.055,.018,.025,m.metal,'水龙头把手');
+    if(interactiveFaucet){
+      const waterMat=new THREE.MeshBasicMaterial({color:0xc7e8ed,transparent:true,opacity:.52,depthWrite:false});
+      const water=cylinder(cx,.995,b+12,.018,.205,waterMat);water.name='厨房水流';water.visible=false;water.scale.y=.02;
+      const hit=block(g,X(cx),1.04,Z(b+8),.58,.55,.58,hitMaterial,'厨房水龙头触控区');hit.castShadow=hit.receiveShadow=false;
+      interactive.faucet={object:stem,hit,water};
+    }}
   function toilet(name,room,b,head){
     record(name,room,b);const [a,b1,c,d]=b,west=head==='west';
     rect(g,west?a:c-9,b1,west?a+9:c,d,.69,m.white,.03,name);
@@ -65,7 +75,12 @@ export function buildFurniture(parent,m){
   record('茶几','living',[470,614,508,666]);cabinet('茶几底座','living',[478,622,500,658],.29,'east',m.walnut);
   rect(g,470,614,508,666,.055,m.stone,.35,'茶几台面');
   cabinet('电视柜','living',[626,562,644,717],.4,'west',m.walnut);
-  block(g,X(645),.96,Z(635),.055,.8,1.65,m.screen,'电视朝西');
+  block(g,X(645)+.018,.96,Z(635),.07,.9,1.78,m.metal,'电视边框');
+  const tvCanvas=typeof document==='undefined'?null:document.createElement('canvas');if(tvCanvas){tvCanvas.width=512;tvCanvas.height=256;}
+  const tvContext=tvCanvas?.getContext('2d')||null,tvTexture=tvCanvas?new THREE.CanvasTexture(tvCanvas):null;if(tvTexture)tvTexture.colorSpace=THREE.SRGBColorSpace;
+  const tvMaterial=new THREE.MeshStandardMaterial({color:0x182123,roughness:.3,map:tvTexture,emissive:0x000000,emissiveIntensity:0});
+  const television=block(g,X(645)-.022,.96,Z(635),.04,.8,1.65,tvMaterial,'电视朝西');
+  interactive.television={object:television,material:tvMaterial,context:tvContext,texture:tvTexture};
   // Dining: six chairs (three per side), no island blocking the kitchen exit.
   record('六人餐桌','living',[389,448,518,505]);
   rect(g,389,448,518,505,.07,m.stone,.73,'六人餐桌');
@@ -78,7 +93,7 @@ export function buildFurniture(parent,m){
   cabinet('东侧灶台与出菜台','kitchen',[478,298,511,380],.8,'west');
   cabinet('冰箱','kitchen',[327,334,366,378],1.85,'east',m.appliance);
   block(g,X(366)+.012,1.31,Z(356),.014,.018,.62,m.joint,'冰箱门缝');
-  basin(375,267,408,291);
+  basin(375,267,408,291,{interactiveFaucet:true});
   rect(g,416,267,469,292,.013,m.oak,.907,'备餐台');
   rect(g,482,309,507,342,.016,m.screen,.907,'灶台');
   for(const y of [318,334])cylinder(494,.93,y,.105,.012,m.metal);
@@ -131,12 +146,25 @@ export function buildFurniture(parent,m){
 
   // Landscape balcony stays a landscape balcony; all laundry is in the north utility.
   rect(g,389,793,496,820,.37,m.oak,.05,'阳台长凳');rect(g,391,794,494,819,.06,m.sage,.42);
-  // Visible fixtures; only a few actual lights are used by the scene.
-  for(const [x,y,h]of [[454,477,2.35],[1081,576,1.03],[1081,747,1.03],[688,612,1.04],[797,323,1.05]]){
-    cylinder(x,h-.20,y,.016,.38,m.metal);cylinder(x,h,y,.10,.10,m.glow);
+  // Living-room curtains begin open; their invisible hit area stays easy to tap on mobile.
+  const curtainMaterial=new THREE.MeshStandardMaterial({color:0xc8c0b2,roughness:1});
+  const curtainLeft=block(g,X(376),.88,Z(731),.34,1.66,.12,curtainMaterial,'客厅左窗帘');
+  const curtainRight=block(g,X(602),.88,Z(731),.34,1.66,.12,curtainMaterial,'客厅右窗帘');
+  const curtainHit=block(g,X(489),.88,Z(731),3.72,1.72,.28,hitMaterial,'客厅窗帘触控区');curtainHit.castShadow=curtainHit.receiveShadow=false;
+  block(g,X(489),1.77,Z(728),3.82,.14,.18,m.wall,'客厅窗帘盒');
+  interactive.curtain={object:curtainLeft,hit:curtainHit,left:curtainLeft,right:curtainRight};
+
+  // Visible fixtures; interactive bulbs clone the shared material so states stay independent.
+  const fixtures=[[454,477,2.35,'living'],[1081,576,1.03],[1081,747,1.03],[688,612,1.04],[797,323,1.05,'study']];
+  for(const [x,y,h,key]of fixtures){
+    cylinder(x,h-.20,y,.016,.38,m.metal);const bulb=cylinder(x,h,y,.10,.10,key?m.glow.clone():m.glow);bulb.name=key==='living'?'客厅主灯':key==='study'?'书房台灯':'住宅灯具';
+    if(key){const hit=block(g,X(x),h-.02,Z(y),.55,.55,.55,hitMaterial,key+'-light-hit');hit.castShadow=hit.receiveShadow=false;interactive[key+'Light']={object:bulb,hit,bulb};}
   }
+  const pendantShade=new THREE.Mesh(new THREE.CylinderGeometry(.23,.13,.15,18),m.linen);pendantShade.position.set(X(454),2.29,Z(477));pendantShade.castShadow=true;g.add(pendantShade);
+  const deskShade=new THREE.Mesh(new THREE.CylinderGeometry(.09,.15,.16,16),m.sage);deskShade.position.set(X(797),1.10,Z(323));deskShade.castShadow=true;g.add(deskShade);
   block(g,X(453),2.73,Z(477),.012,.60,.012,m.metal,'餐灯吊线');
   rect(g,479,298,481,378,.025,m.glow,1.36,'厨房工作灯');
   rect(g,396,819,489,820,.025,m.glow,.20,'阳台低位灯');
-  return g;
+  for(const [x,y]of [[613,545],[758,470]])block(g,X(x),.82,Z(y),.035,.12,.09,m.white,'墙面开关');
+  return {group:g,interactive};
 }
