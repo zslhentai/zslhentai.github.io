@@ -64,9 +64,13 @@ export function buildArchitecture(parent,m) {
     [850,475,850,485,12],[850,543,850,548,12],
     [230,737,281,737,16],[332,737,365,737,10],[613,737,658,737,16],
   ];
-  for(const [x1,y1,x2,y2,t]of walls){const w=Math.max(t,Math.abs(x2-x1)),d=Math.max(t,Math.abs(y2-y1));
+  const skirtGeometry=new THREE.BoxGeometry(1,1,1),skirts=new THREE.InstancedMesh(skirtGeometry,m.skirting,walls.length),skirtMatrix=new THREE.Object3D();
+  for(const [index,[x1,y1,x2,y2,t]]of walls.entries()){const w=Math.max(t,Math.abs(x2-x1)),d=Math.max(t,Math.abs(y2-y1));
     const b=[(x1+x2-w)/2,(y1+y2-d)/2,(x1+x2+w)/2,(y1+y2+d)/2];
-    rect(group,...b,CUT,m.wall,0,'wall');rect(group,...b,.035,m.cap,CUT,'wall-cap');}
+    rect(group,...b,CUT,m.wall,0,'wall');rect(group,...b,.035,m.cap,CUT,'wall-cap');
+    skirtMatrix.position.set(X((b[0]+b[2])/2),.035,Z((b[1]+b[3])/2));skirtMatrix.scale.set((b[2]-b[0])*SCALE+.025,.07,(b[3]-b[1])*SCALE+.025);
+    skirtMatrix.updateMatrix();skirts.setMatrixAt(index,skirtMatrix.matrix);}
+  skirts.name='wall-skirting';skirts.castShadow=skirts.receiveShadow=true;group.add(skirts);
   function window(x1,y1,x2,y2,sill=.65,height=.9){
     const horizontal=y1===y2,length=Math.hypot(x2-x1,y2-y1)*SCALE,x=X((x1+x2)/2),z=Z((y1+y2)/2);
     block(group,x,sill/2,z,horizontal?length:.14,sill,horizontal?.14:length,m.wall,'window-sill');
@@ -83,7 +87,9 @@ export function buildArchitecture(parent,m) {
     if(d.sliding)block(hinge,width*1.4,.61,0,width,1.22,.055,m.door,d.name);
     else{const leaf=block(hinge,Math.cos(d.open)*width/2,.61,Math.sin(d.open)*width/2,width,1.22,.055,m.door,d.name);leaf.rotation.y=-d.open;
       block(hinge,Math.cos(d.open)*width*.86,.96,Math.sin(d.open)*width*.86+.045,.065,.035,.06,m.metal);}
-    block(hinge,0,CUT/2,0,.06,CUT,.1,m.oak);});
+    const dx=Math.cos(d.closed),dz=Math.sin(d.closed);
+    block(hinge,0,CUT/2,0,.075,CUT,.11,m.trim);block(hinge,dx*width,CUT/2,dz*width,.075,CUT,.11,m.trim);
+    block(hinge,dx*width/2,CUT-.035,dz*width/2,Math.abs(dx)*width+.08,.07,Math.abs(dz)*width+.08,m.trim);});
   block(group,X(284),.63,Z(763),.055,1.26,.77,m.glass,'阳台平开门');
   return group;
 }
