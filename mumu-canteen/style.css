@@ -34,3 +34,5 @@
 .spec-close,#personmask .personclose{width:44px;height:44px}
 .spec-option{min-height:44px}
 .cartbar{bottom:82px}
+.cartbar .hint{font-size:14px;font-weight:700;color:#fff;margin-top:0}
+.cartbar .total{font-size:13px;font-weight:500;color:#e6d9cf;margin-top:3px}

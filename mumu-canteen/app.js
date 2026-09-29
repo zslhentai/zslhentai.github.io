@@ -195,7 +195,7 @@ function updateCart(){
   const total = entries.reduce((s,x)=>s+x.qty*x.price,0);
   document.getElementById('count').textContent=count;
   document.getElementById('total').textContent=money(total);
-  document.getElementById('hint').textContent=count ? `今天点了 ${count} 样` : '今天还没点菜';
+  document.getElementById('hint').textContent=count ? `今天点了 ${count} 份` : '今天还没点菜';
   document.getElementById('checkout').disabled=!count;
   if(document.getElementById('mask').classList.contains('show')) renderCartList();
 }
