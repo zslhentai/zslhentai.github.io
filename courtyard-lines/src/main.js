@@ -23,8 +23,8 @@ const sun=new THREE.DirectionalLight(0xffe8c9,3.15);sun.position.set(-10,17,10);
 sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-11,right:11,top:9,bottom:-9,far:45});sun.shadow.normalBias=.035;scene.add(sun);
 sun.target.position.set(X(470),0,Z(590));scene.add(sun.target);
 const daylightFill=new THREE.PointLight(0xffe6bf,6.5,10,2);daylightFill.position.set(X(450),4.2,Z(700));scene.add(daylightFill);
-const warmLights=[[500,625,2.30,13,8],[454,477,2.25,10,7],[424,318,2.15,6.5,6],
-  [1035,646,1.80,4.8,6],[715,650,1.80,2.8,4.5],[840,360,1.80,3.8,5]].map(([x,z,y,power,distance])=>{
+const warmLights=[[500,625,2.30,16,8],[454,477,2.25,10,7],[424,318,2.15,6.5,6],
+  [1035,646,1.80,6,6],[715,650,1.80,4,4.5],[840,360,1.80,4.8,5]].map(([x,z,y,power,distance])=>{
   const light=new THREE.PointLight(0xffc58a,0,distance,2);light.position.set(X(x),y,Z(z));light.userData.night=power;scene.add(light);return light;});
 const ground=new THREE.Mesh(new THREE.PlaneGeometry(100,100),new THREE.ShadowMaterial({opacity:.14}));
 ground.rotation.x=-Math.PI/2;ground.position.y=-.205;ground.receiveShadow=true;scene.add(ground);
@@ -66,7 +66,7 @@ const captions={overview:'全景 · 三室两厅双卫，公私有序',living:'�
 const viewBounds={overview:[170,239,1117,845],living:[235,248,658,742],master:[848,286,1117,781],
   guest:[650,540,857,783],studio:[758,286,945,481],balcony:[229,730,661,845],entry:[170,300,326,538]};
 const viewSettings={
-  overview:{direction:[-.42,.68,.60],padding:1.025,targetY:.56},
+  overview:{direction:[-.42,.68,.60],padding:.97,targetY:.56},
   living:{direction:[-.48,.69,.54],padding:1.25,targetY:.60},
   master:{direction:[.35,.76,.55],padding:1.35,targetY:.58},
   guest:{direction:[.35,.78,.52],padding:1.45,targetY:.56},
@@ -83,7 +83,7 @@ function moveToView(key='overview'){
   const tanY=Math.tan(THREE.MathUtils.degToRad(camera.fov/2)),tanX=tanY*camera.aspect;
   let distance=0;for(const x of [X(a),X(c)])for(const z of [Z(b),Z(d)])for(const y of [-.2,2.95]){
     const v=new THREE.Vector3(x,y,z).sub(target);distance=Math.max(distance,Math.abs(v.dot(right))/tanX+v.dot(direction),Math.abs(v.dot(up))/tanY+v.dot(direction));}
-  const mobileOverview=innerWidth<=900&&key==='overview',padding=settings.padding*(mobileOverview?.96:1);
+  const mobileOverview=innerWidth<=900&&key==='overview',padding=settings.padding*(mobileOverview?1.015:1);
   controls.target.copy(target);camera.position.copy(target).addScaledVector(direction,distance*padding);
   controls.update();document.querySelector('#scene-caption').textContent=captions[key];
   dirty=true;
