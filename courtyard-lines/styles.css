@@ -71,7 +71,7 @@ body.night dialog { background: rgba(36,46,53,.98); }
 .loading p { margin: 14px 0 0; color: var(--muted); font-family: var(--serif); font-size: 11px; letter-spacing: .12em; }
 .loading.is-hidden { opacity: 0; visibility: hidden; }
 .webgl-error { position: absolute; inset: 0; display: grid; place-content: center; padding: 24px; text-align: center; color: #764e49; font-family: var(--serif); }
-.webgl-error[hidden] { display: none !important; }
+.webgl-error[hidden], .loading[hidden] { display: none !important; }
 @keyframes loading { 50% { transform: scaleX(.55); opacity: .35; } }
 
 .viewer-footer { grid-column: 1 / -1; grid-row: 3; min-height: 70px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); display: flex; align-items: stretch; justify-content: space-between; }
@@ -124,13 +124,13 @@ dialog dd { margin: 0; font-family: var(--serif); }
   .intro br { display:none; }
   .copy-foot { display: none; }
   .scene-wrap { height: clamp(390px,54svh,520px); min-height: 390px; margin: 0 -12px; }
-  #scene { inset:28px 0 24px; }
+  #scene { inset:76px 0 28px; }
   .scene-status { left: 14px; bottom: 9px; max-width: calc(100% - 64px); font-size: 9px; }
   .interaction-hint { right:14px; bottom:30px; font-size:9px; }
   .scene-tools { right: 12px; top:5px; gap: 8px; }
-  .scene-tools .round-button { width: 36px; height: 36px; }
+  .scene-tools .round-button { width: 44px; height: 44px; }
   .scene-tools .reset { margin-top: 0; }
-  .interaction-guide { right: 14px; top: 48px; }
+  .interaction-guide { right: 14px; top: 56px; }
   .viewer-footer { min-height: auto; margin-top: 6px; overflow-x: auto; scrollbar-width: none; }
   .viewer-footer::-webkit-scrollbar { display: none; }
   .view-nav { width: max-content; }
@@ -154,4 +154,5 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-off
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
 

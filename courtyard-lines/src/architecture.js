@@ -84,7 +84,7 @@ export function buildArchitecture(parent,m) {
   // Shower screen with an actual access gap; not a sealed internal cell.
   rect(group,653,357,694,361,1.55,m.glass);
   doors.forEach(d=>{const width=d.width*SCALE,hinge=new THREE.Group();hinge.position.set(X(d.hinge[0]),0,Z(d.hinge[1]));group.add(hinge);
-    if(d.sliding)block(hinge,width*1.4,.61,0,width,1.22,.055,m.door,d.name);
+    if(d.sliding)block(hinge,width*1.5+.04,.61,0,width,1.22,.055,m.door,d.name);
     else{const leaf=block(hinge,Math.cos(d.open)*width/2,.61,Math.sin(d.open)*width/2,width,1.22,.055,m.door,d.name);leaf.rotation.y=-d.open;
       block(hinge,Math.cos(d.open)*width*.86,.96,Math.sin(d.open)*width*.86+.045,.065,.035,.06,m.metal);}
     const dx=Math.cos(d.closed),dz=Math.sin(d.closed);
@@ -93,3 +93,4 @@ export function buildArchitecture(parent,m) {
   block(group,X(284),.63,Z(763),.055,1.26,.77,m.glass,'阳台平开门');
   return group;
 }
+

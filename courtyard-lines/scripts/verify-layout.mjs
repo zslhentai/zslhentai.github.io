@@ -11,10 +11,27 @@ const intersects=(a,b)=>a[0]<b[2]&&a[2]>b[0]&&a[1]<b[3]&&a[3]>b[1];
 // Inspect actual wall meshes, not just furniture registrations. This catches buried cabinetry.
 home.updateMatrixWorld(true);
 const walls=[];home.traverse(o=>{if(o.name==='wall')walls.push(new THREE.Box3().setFromObject(o));});
+const doorLeaves=new Map();home.traverse(o=>{if(o.isMesh&&doors.some(d=>d.name===o.name))doorLeaves.set(o.name,new THREE.Box3().setFromObject(o));});
+const obstacles=[...walls,...doorLeaves.values()].map(b=>[b.min.x,b.min.z,b.max.x,b.max.z]);
 for(const f of footprints){
   const [a,b,c,d]=f.bounds;
   for(const w of walls)assert(!intersects([X(a)+.002,Z(b)+.002,X(c)-.002,Z(d)-.002],
     [w.min.x,w.min.z,w.max.x,w.max.z]),`${f.name}: intersects wall`);
+}
+// Check real openings and their two sides, not only furniture swept by hinged leaves.
+const inRoom=(point,key)=>key==='outside'||(()=>{const [a,b,c,d]=rooms[key].rect;return point[0]>=a&&point[0]<=c&&point[1]>=b&&point[1]<=d;})();
+for(const d of doors){
+  const dx=Math.cos(d.closed),dz=Math.sin(d.closed),mid=[d.hinge[0]+dx*d.width/2,d.hinge[1]+dz*d.width/2];
+  const sides=[-1,1].map(sign=>[mid[0]-dz*15*sign,mid[1]+dx*15*sign]);
+  assert(sides.some((p,i)=>inRoom(p,d.connects[0])&&inRoom(sides[1-i],d.connects[1])),`${d.name}: room connection mismatch`);
+  for(let j=4;j<=d.width-4;j++){
+    const x=X(d.hinge[0]+dx*j),z=Z(d.hinge[1]+dz*j);
+    for(const w of walls)assert(!(x>w.min.x&&x<w.max.x&&z>w.min.z&&z<w.max.z),`${d.name}: wall fills opening`);
+  }
+  if(d.sliding){
+    const leaf=doorLeaves.get(d.name);
+    assert(leaf.min.x>=X(d.hinge[0]+d.width)+.0375,`${d.name}: parked leaf blocks clear opening/jamb`);
+  }
 }
 for(const d of doors.filter(d=>!d.sliding)){
   assert(d.width*SCALE>=.70,`${d.name}: opening too narrow`);
@@ -32,7 +49,10 @@ for(const [name,b]of [
   ['public to private corridor',[535,490,843,536]],
   ['suite entry to sleeping area',[859,552,918,753]],
   ['dressing aisle',[985,445,1063,548]],
-])for(const f of footprints)assert(!intersects(b,f.bounds),`${name}: blocked by ${f.name}`);
+]){
+  for(const f of footprints)assert(!intersects(b,f.bounds),`${name}: blocked by ${f.name}`);
+  for(const obstacle of obstacles)assert(!intersects([X(b[0]),Z(b[1]),X(b[2]),Z(b[3])],obstacle),`${name}: blocked by wall or open door`);
+}
 for(const x of [407,453,499])for(const y of [405,548]){
   const pulledChair=[x-16,y-16,x+16,y+16];
   for(const f of footprints)assert(!intersects(pulledChair,f.bounds),`pulled dining chair: ${f.name}`);
@@ -49,6 +69,7 @@ assert((rooms.guest.rect[2]-guest[2])*SCALE>=.60,'guest bed end clearance');
 assert(footprints.filter(f=>f.name.includes('马桶')).length===2,'two toilets required');
 assert(footprints.some(f=>f.name==='洗烘塔'&&f.room==='utility'),'utility separate from balcony');
 assert(byName('主沙发')[2]<byName('电视柜')[0],'east-facing living composition');
-console.log('PASS: registered furniture vs walls, 5 door sweeps, 5 reserved routes, 6 pulled chairs, beds, two bathrooms, utility and sofa/TV relation.');
+console.log('PASS: registered furniture vs walls, 5 door sweeps, 6 door openings/connections, 5 reserved routes vs furniture/walls/open doors, 6 pulled chairs, beds, two bathrooms, utility and sofa/TV relation.');
 console.log('Approximate guest clearances (m): north .63 / south .66 / foot .60; dressing aisle 1.17; corridor .93.');
 console.log('Limits: proportion-based model, not a construction or accessibility certification; sliding cabinetry assumed.');
+
